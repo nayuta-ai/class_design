@@ -16,7 +16,7 @@ build:
 run:
 	docker run \
 		-dit \
-		-v $(PWD):/workspace \
+		-v $(PWD):/go/src \
 		-p $(PORT):$(PORT) \
 		--name $(CONTAINER_NAME) \
 		--rm \
