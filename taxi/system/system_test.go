@@ -1,10 +1,11 @@
 package system
 
 import (
+	"taxi/record"
 	"testing"
 )
 
-func TestCalcTotalFare(t *testing.T){
+func TestCalcTotalFare(t *testing.T) {
 	tests := []struct {
 		name string
 		test string
@@ -17,19 +18,76 @@ func TestCalcTotalFare(t *testing.T){
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T){
+		t.Run(tt.name, func(t *testing.T) {
 			totalFare, err := CalcTotalFare(tt.test)
 			if err != nil {
 				t.Error(err)
 			}
-			if totalFare != tt.want{
+			if totalFare != tt.want {
 				t.Errorf("The totalFare should be %v.", tt.want)
 			}
 		})
 	}
 }
 
-func TestCalcMidnightMinutes(t *testing.T){
+func TestFetchInfoFromLog(t *testing.T) {
+	tests := []struct {
+		name string
+		test []record.Record
+		want []float64
+	}{
+		{
+			name: "test1",
+			test: []record.Record{
+				{
+					Distance: 0,
+					Time: record.Time{
+						Minutes: 49808.245,
+						Hours:   13,
+					},
+				},
+				{
+					Distance: 4,
+					Time: record.Time{
+						Minutes: 49811.123,
+						Hours:   13,
+					},
+				},
+				{
+					Distance: 10.2,
+					Time: record.Time{
+						Minutes: 49812.125,
+						Hours:   13,
+					},
+				},
+				{
+					Distance: 8.7,
+					Time: record.Time{
+						Minutes: 49813.100,
+						Hours:   13,
+					},
+				},
+			},
+			want: []float64{
+				23.9,
+				0.0,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			totalDistance, midnightMinutes := fetchInfoFromLog(tt.test)
+			if totalDistance != tt.want[0] {
+				t.Errorf("The total distance should be %v, but %v", tt.want[0], totalDistance)
+			}
+			if midnightMinutes != tt.want[1] {
+				t.Errorf("The total midnight times should be %v, but %v", tt.want[1], midnightMinutes)
+			}
+		})
+	}
+}
+
+func TestCalcMidnightMinutes(t *testing.T) {
 	tests := []struct {
 		name string
 		test float64
@@ -51,17 +109,17 @@ func TestCalcMidnightMinutes(t *testing.T){
 			want: 160,
 		},
 	}
-	for _, tt := range tests{
-		t.Run(tt.name, func(t *testing.T){
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			fare := calcAdditionalFare(tt.test)
-			if fare != tt.want{
+			if fare != tt.want {
 				t.Errorf("The fare should be %v.", tt.want)
 			}
 		})
 	}
 }
 
-func TestCalcBaseFare(t *testing.T){
+func TestCalcBaseFare(t *testing.T) {
 	tests := []struct {
 		name string
 		test float64
@@ -83,49 +141,61 @@ func TestCalcBaseFare(t *testing.T){
 			want: 570,
 		},
 	}
-	for _, tt := range tests{
-		t.Run(tt.name, func(t *testing.T){
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			fare := calcBaseFare(tt.test)
-			if fare != tt.want{
+			if fare != tt.want {
 				t.Errorf("The fare should be %v.", tt.want)
 			}
 		})
 	}
 }
 
-func TestCheckDrivingDuringMidnight(t *testing.T){
-	type test struct {
-		prevHours int64
-		currHours int64
-	}
+func TestFetchMidnightTime(t *testing.T) {
 	tests := []struct {
 		name string
-		test test
-		want bool
+		test []record.Time
+		want float64
 	}{
 		{
 			name: "test1",
-			test: test{
-				prevHours: 13,
-				currHours: 13,
+			test: []record.Time{
+				{Minutes: 0.0, Hours: 0},
+				{Minutes: 21600, Hours: 6},
 			},
-			want: false,
+			want: 18000,
+		},
+		{
+			name: "test2",
+			test: []record.Time{
+				{Minutes: 0.0, Hours: 0},
+				{Minutes: 82800, Hours: 23},
+			},
+			want: 21600,
+		},
+		{
+			name: "test3",
+			test: []record.Time{
+				{Minutes: 36000.0, Hours: 10},
+				{Minutes: 108000.0, Hours: 30},
+			},
+			want: 25200,
 		},
 	}
-	for _, tt := range tests{
-		t.Run(tt.name, func(t *testing.T){
-			ok := checkDrivingDuringMidnight(tt.test.prevHours, tt.test.currHours)
-			if ok != tt.want{
-				t.Errorf("The function should return %v.", tt.want)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			currMidnightMinutes := fetchMidnightTime(tt.test[0], tt.test[1])
+			if currMidnightMinutes != tt.want {
+				t.Errorf("The midnight minutes should be %v, but %v", tt.want, currMidnightMinutes)
 			}
 		})
 	}
 }
 
-func TestCalcVelocity(t *testing.T){
+func TestCalcVelocity(t *testing.T) {
 	type test struct {
 		diffMinutes float64
-		distance float64
+		distance    float64
 	}
 	tests := []struct {
 		name string
@@ -136,15 +206,15 @@ func TestCalcVelocity(t *testing.T){
 			name: "test1",
 			test: test{
 				diffMinutes: 2.878,
-				distance: 4,
+				distance:    4,
 			},
 			want: 5.0034746351633075,
 		},
 	}
-	for _, tt := range tests{
-		t.Run(tt.name, func(t *testing.T){
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			velocity := calcVelocity(tt.test.diffMinutes, tt.test.distance)
-			if velocity != tt.want{
+			if velocity != tt.want {
 				t.Errorf("The velocity should be %v.", tt.want)
 			}
 		})
