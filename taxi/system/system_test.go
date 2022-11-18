@@ -87,7 +87,7 @@ func TestFetchInfoFromLog(t *testing.T) {
 	}
 }
 
-func TestCalcMidnightMinutes(t *testing.T) {
+func TestCalcAdditionalFare(t *testing.T) {
 	tests := []struct {
 		name string
 		test float64

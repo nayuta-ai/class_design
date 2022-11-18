@@ -19,7 +19,7 @@ func CalcTotalFare(logs string) (int64, error) {
 	return totalFare, nil
 }
 
-// fetchInfoFromLog fetches the total distance and all of the midnight minutes.
+// fetchInfoFromLog fetches the total distance and sum of the midnight minutes.
 func fetchInfoFromLog(records []record.Record) (float64, float64) {
 	var midnightMinutes float64
 	var totalDistance float64
