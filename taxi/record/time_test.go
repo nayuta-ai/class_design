@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestCreateTimeObject(t *testing.T) {
+func TestNewTimeObject(t *testing.T) {
 	tests := []struct {
 		name string
 		test string
@@ -31,7 +31,7 @@ func TestCreateTimeObject(t *testing.T) {
 	}
 }
 
-func TestConvertTimeIntoHours(t *testing.T) {
+func TestExtractHours(t *testing.T) {
 	tests := []struct {
 		name string
 		test []string
@@ -52,7 +52,7 @@ func TestConvertTimeIntoHours(t *testing.T) {
 	}
 }
 
-func TestConvertTimeIntoMinutes(t *testing.T) {
+func TestExtractMinutes(t *testing.T) {
 	tests := []struct {
 		name string
 		test []string

@@ -1,6 +1,8 @@
 package record
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -10,14 +12,26 @@ type Time struct {
 	Minutes float64
 }
 
-// newTime converts the timestamp into Time class.
+const (
+	lengthTimestamp int   = 3
+	maxHour         int64 = 100
+	minHour         int64 = 0
+)
+
+// newTime creates a Time instance from timestamp string.
 // time.Hours is hours and time.Minutes is minutes.
 func newTime(timestamp string) (Time, error) {
 	timeObject := strings.Split(timestamp, ":")
+	if len(timeObject) != lengthTimestamp {
+		return Time{}, errors.New("the length of a list of timeObject should be 3")
+	}
 	var time Time
 	hours, err := extractHours(timeObject)
 	if err != nil {
 		return Time{}, err
+	}
+	if hours < minHour || maxHour <= hours {
+		return Time{}, fmt.Errorf("hours should be more than equal to %d and less than %d", minHour, maxHour)
 	}
 	time.Hours = hours
 	minutes, err := ExtractMinutes(timeObject)
@@ -28,7 +42,7 @@ func newTime(timestamp string) (Time, error) {
 	return time, nil
 }
 
-// extractHours extracts the timeObject into hours
+// extractMinutes extracts minutes info from timeObject
 // whose type is int64
 func extractHours(timeObject []string) (int64, error) {
 	hoursString := timeObject[0]
@@ -43,7 +57,7 @@ func extractHours(timeObject []string) (int64, error) {
 // whose type is float64
 func ExtractMinutes(timeObject []string) (float64, error) {
 	var (
-		totalMinutes float64 = 0
+		totalMinutes  float64 = 0
 		timeConverter float64 = 3600
 	)
 	const timeUnit float64 = 60
